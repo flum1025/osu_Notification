@@ -4,6 +4,7 @@ require 'json'
 require 'sqlite3'
 $SourcePath = File.expand_path('../', __FILE__)
 require $SourcePath + "/osu_api.rb"
+require $SourcePath + "/osu_web.rb"
 require $SourcePath + "/data/setting.rb"
 
 $db = $SourcePath + "/data/data.db"
@@ -124,7 +125,10 @@ class Osu_Notification
       row = @row_mania
       title = "osu!mania"
     end
-    text = "[#{hash['username']}] #{title} PP:#{hash['pp_raw'].to_i.round(0)}(#{hash['pp_raw'].to_i.round(0) - row[0][4].round(0)}) Rank:##{hash['pp_rank']}(#{hash['pp_rank'].to_i - row[0][3]}) Lv:#{hash['level'].to_i.round(0)}(#{hash['level'].to_i.round(0) - row[0][2].round(0)}) ACC:#{hash['accuracy'].to_f.round(2)}%(#{(hash['accuracy'].to_f - row[0][5]).round(2)}%) Playcount:#{hash['playcount'].to_i}(#{hash['playcount'].to_i - row[0][1]}) SS:#{hash['count_rank_ss'].to_i}(#{hash['count_rank_ss'].to_i - row[0][6]}) S:#{hash['count_rank_s'].to_i}(#{hash['count_rank_s'].to_i - row[0][7]}) A:#{hash['count_rank_a'].to_i}(#{hash['count_rank_a'].to_i - row[0][8]})"
+    osu_web = Osu_web.new('username', 'passsword','api_key', '3', "user_id")
+    jp_rank = osu_web.get_domestic_rank
+    nextpp = osu_web.next_domestic_rank_up(1)
+    text = "[#{hash['username']}] #{title} PP:#{hash['pp_raw'].to_i.round(0)}(#{hash['pp_raw'].to_i.round(0) - row[0][4].round(0)}) Rank:##{hash['pp_rank']}(#{hash['pp_rank'].to_i - row[0][3]}) JP_Rank:##{jp_rank}(nextpp:#{nextpp[0]}) Lv:#{hash['level'].to_i.round(0)}(#{hash['level'].to_i.round(0) - row[0][2].round(0)}) ACC:#{hash['accuracy'].to_f.round(2)}%(#{(hash['accuracy'].to_f - row[0][5]).round(2)}%) Playcount:#{hash['playcount'].to_i}(#{hash['playcount'].to_i - row[0][1]}) SS:#{hash['count_rank_ss'].to_i}(#{hash['count_rank_ss'].to_i - row[0][6]}) S:#{hash['count_rank_s'].to_i}(#{hash['count_rank_s'].to_i - row[0][7]})"
   end
   
   def main()
