@@ -25,11 +25,11 @@ class Osu_Notification
     SQLite3::Database.open($db) do |db|
       db.execute <<-SQL
         CREATE TABLE IF NOT EXISTS data_osu
-          (username TEXT, playcount INTEGER, level INTEGER, pp_rank INTEGER, pp_raw INTEGER, accuracy INTEGER, count_rank_ss INTEGER, count_rank_s INTEGER, count_rank_a INTEGER)
+          (username TEXT, playcount INTEGER, level INTEGER, pp_rank INTEGER, pp_raw INTEGER, accuracy INTEGER, count_rank_ss INTEGER, count_rank_s INTEGER, count_rank_a INTEGER, pp_country_rank INTEGER)
         SQL
       db.execute <<-SQL
         CREATE TABLE IF NOT EXISTS data_mania
-          (username TEXT, playcount INTEGER, level INTEGER, pp_rank INTEGER, pp_raw INTEGER, accuracy INTEGER, count_rank_ss INTEGER, count_rank_s INTEGER, count_rank_a INTEGER)
+          (username TEXT, playcount INTEGER, level INTEGER, pp_rank INTEGER, pp_raw INTEGER, accuracy INTEGER, count_rank_ss INTEGER, count_rank_s INTEGER, count_rank_a INTEGER, pp_country_rank INTEGER)
         SQL
       @row_osu = db.execute("select * from data_osu;")
       @row_mania = db.execute("select * from data_mania;")
@@ -74,6 +74,7 @@ class Osu_Notification
     playcount = result[1][0]['playcount']
     level = result[1][0]['level']
     pp_rank = result[1][0]['pp_rank']
+    pp_country_rank = result[1][0]['pp_country_rank']
     pp_raw = result[1][0]['pp_raw']
     accuracy = result[1][0]['accuracy']
     count_rank_ss = result[1][0]['count_rank_ss']
@@ -99,6 +100,7 @@ class Osu_Notification
     playcount = result[1][0]['playcount']
     level = result[1][0]['level']
     pp_rank = result[1][0]['pp_rank']
+    pp_country_rank = result[1][0]['pp_country_rank']
     pp_raw = result[1][0]['pp_raw']
     accuracy = result[1][0]['accuracy']
     count_rank_ss = result[1][0]['count_rank_ss']
@@ -121,18 +123,17 @@ class Osu_Notification
     if type == "osu"
       row = @row_osu
       title = "osu!"
+      type_n = '0'
     elsif type == "mania"
       row = @row_mania
       title = "osu!mania"
+      type_n = '3'
     end
-    osu_web = Osu_web.new('username', 'passsword','api_key', '3', "user_id")
-    jp_rank = osu_web.get_domestic_rank
-    nextpp = osu_web.next_domestic_rank_up(1)
-    text = "[#{hash['username']}] #{title} PP:#{hash['pp_raw'].to_i.round(0)}(#{hash['pp_raw'].to_i.round(0) - row[0][4].round(0)}) Rank:##{hash['pp_rank']}(#{hash['pp_rank'].to_i - row[0][3]}) JP_Rank:##{jp_rank}(nextpp:#{nextpp[0]}) Lv:#{hash['level'].to_i.round(0)}(#{hash['level'].to_i.round(0) - row[0][2].round(0)}) ACC:#{hash['accuracy'].to_f.round(2)}%(#{(hash['accuracy'].to_f - row[0][5]).round(2)}%) Playcount:#{hash['playcount'].to_i}(#{hash['playcount'].to_i - row[0][1]}) SS:#{hash['count_rank_ss'].to_i}(#{hash['count_rank_ss'].to_i - row[0][6]}) S:#{hash['count_rank_s'].to_i}(#{hash['count_rank_s'].to_i - row[0][7]})"
+    text = "[#{hash['username']}]#{title} PP:#{hash['pp_raw'].to_i.round(0)}(#{hash['pp_raw'].to_i.round(0) - row[0][4].round(0)}) Rank:##{hash['pp_rank']}(#{hash['pp_rank'].to_i - row[0][3]}) JPRank:##{hash['pp_country_rank']}(#{hash['pp_country_rank'].to_i - row[0][9]}) Lv:#{hash['level'].to_i.round(0)}(#{hash['level'].to_i.round(0) - row[0][2].round(0)}) ACC:#{hash['accuracy'].to_f.round(2)}%(#{(hash['accuracy'].to_f - row[0][5]).round(2)}%) Playcount:#{hash['playcount'].to_i}(#{hash['playcount'].to_i - row[0][1]}) SS:#{hash['count_rank_ss'].to_i}(#{hash['count_rank_ss'].to_i - row[0][6]})"
   end
   
   def main()
-    @rest_client.update(text(osu(), "osu"))
+    #@rest_client.update(text(osu(), "osu"))
     @rest_client.update(text(mania(), "mania"))
   end
 end
